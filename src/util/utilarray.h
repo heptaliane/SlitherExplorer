@@ -118,6 +118,7 @@ public:
     inline bool getLogReservedProperty() const { return is_log_reserved; }
     inline int getLogReservedSize() const { return log_reserved_size; }
     void exportLog(vector<pair<pair<int, int>, short> > *vec) const;
+    void exportArray(ArrayD<short> *obj) const;
 private:
     void init(int row_size, int col_size);
     //write to array_log

@@ -107,6 +107,10 @@ void Utilarray::exportLog(vector<pair<pair<int, int>, short> > *vec) const {
         vec->push_back(*itr);
     }
 }
+void Utilarray::exportArray(ArrayD<short> *obj) const {
+    obj->clone(*array);
+}
+
 //---private---
 void Utilarray::init(int row_size, int col_size) {
     array = new ArrayD<short>(row_size, col_size);
