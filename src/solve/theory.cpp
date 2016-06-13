@@ -44,3 +44,49 @@ void Theory::init(const ArrayD<short> &cell) {
 
     buf_cell->clone(cell);
 }
+bool Theory::serachCell(int num, int *resume) const {
+    int row = resume[0], col = resume[1] + 1;
+    int row_size = buf_cell->getlen1();
+    int col_size = buf_cell->getlen2();
+
+    for ( ; row < row_size; row++) {
+        for ( ; col < col_size; col++) {
+            if (buf_cell->getArray(row, col, 4) == num) {
+                resume[0] = row;
+                resume[1] = col;
+                return true;
+            }
+        }
+    }
+    //TODO write exception in case num == 0
+    return false;
+}
+bool Theory::searchCell0(int *resume) const {
+    if (resume[0] == -1) {
+
+        if (resume[1] == -1) {
+            //(-1, -1) -> (-1, colSize)
+            resume[1] = buf_cell->getlen2();
+        } else {
+            //(-1, rowSize) -> (colSize, rowSize)
+            resume[0] = buf_cell->getlen1();
+        }
+
+    } else if (resume[0] == buf_cell->getlen1()) {
+
+        if (resume[1] == -1) {
+            //(rowSize, -1) -> (-1, -1)
+            resume[0] = -1;
+        } else {
+            //(rowSize, colSize) -> end
+            return false;
+        }
+
+    } else {
+        //begin -> (rowSize, -1)
+        resume[0] = buf_cell->getlen1();
+        resume[1] = -1;
+    }
+
+    return true;
+}

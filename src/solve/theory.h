@@ -44,7 +44,7 @@ private:
 
     void init(const ArrayD<short> &cell);
     void reloadVertex(int row, int col);
-    bool serachCell(int num, int *resume);
+    bool serachCell(int num, int *resume) const;
     bool serachCell0(int *resume);
     bool checkVertex(int row, int col);
     bool checkCell();
