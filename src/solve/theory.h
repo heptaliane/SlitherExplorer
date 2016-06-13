@@ -51,10 +51,10 @@ private:
     bool theory0();
     bool theory3();
 
-    Utilarray *buf_row_grid;
-    Utilarray *buf_col_grid;
-    Utilarray *buf_vertex;
-    Utilarray *buf_cell;
+    Utilarray *buf_row_grid = NULL;
+    Utilarray *buf_col_grid = NULL;
+    Utilarray *buf_vertex = NULL;
+    Utilarray *buf_cell = NULL;
 };
 
 #endif /* THEORY__H_ */
