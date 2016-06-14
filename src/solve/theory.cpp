@@ -45,9 +45,16 @@ void Theory::init(const ArrayD<short> &cell) {
     buf_cell->clone(cell);
 }
 bool Theory::serachCell(int num, int *resume) const {
-    int row = resume[0], col = resume[1] + 1;
     int row_size = buf_cell->getlen1();
     int col_size = buf_cell->getlen2();
+
+    if (num == 0) {
+        if (resume[0] < 0 || resume[0] >= row_size) {
+            return searchCell0(resume);
+        }
+    }
+
+    int row = resume[0], col = resume[1] + 1;
 
     for ( ; row < row_size; row++) {
         for ( ; col < col_size; col++) {
@@ -58,7 +65,11 @@ bool Theory::serachCell(int num, int *resume) const {
             }
         }
     }
-    //TODO write exception in case num == 0
+
+    if (num == 0) {
+        return searchCell0(resume);
+    }
+
     return false;
 }
 bool Theory::searchCell0(int *resume) const {
