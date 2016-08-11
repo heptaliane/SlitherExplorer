@@ -1,7 +1,34 @@
-#ifndef THEORY_H_
-#define THEORY_H_
+#ifndef SOLVE_H_
+#define SOLVE_H_
 
 #include "../util/utilarray.h"
+
+class Checker {
+public:
+    Checker(const ArrayD<short> &givenCell);
+    Checker() {};
+    ~Checker() {};
+    void reloadVertex(
+            const ArrayD<short> &row_grid,
+            const ArrayD<short> &col_grid,
+            ArrayD<short> *vertex) const;
+    bool searchCell(int num, int *resume) const;
+    bool searchCell0(int *resume) const;
+    bool checkVertex(
+            ArrayD<short> *row_grid,
+            ArrayD<short> *col_grid
+            ) const;
+    bool checkCell(
+            ArrayD<short> *row_grid,
+            ArrayD<short> *col_grid
+            ) const;
+private:
+    const int vertex_map[7][2] = {
+        {}, {0, 2}, {1, 3}, {0, 1}, {1, 2}. {2, 3}, {3, 0}
+    };
+    ArrayD<short> cell;
+    void setVertexGrid(int value, short *grid) const;
+};
 
 class Theory {
 public:
@@ -43,18 +70,15 @@ private:
     };
 
     void init(const ArrayD<short> &cell);
-    void reloadVertex(int row, int col);
-    bool serachCell(int num, int *resume) const;
-    bool serachCell0(int *resume);
-    bool checkVertex(int row, int col);
-    bool checkCell();
     bool theory0();
+    bool slave0(int row, int col, int diag);
     bool theory3();
 
     Utilarray *buf_row_grid = NULL;
     Utilarray *buf_col_grid = NULL;
     Utilarray *buf_vertex = NULL;
     Utilarray *buf_cell = NULL;
+    Checker *checker = NULL;
 };
 
-#endif /* THEORY__H_ */
+#endif /* SOLVE__H_ */
