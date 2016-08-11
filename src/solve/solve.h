@@ -73,6 +73,7 @@ private:
     bool theory0();
     bool slave0(int row, int col, int diag);
     bool theory3();
+    bool slave3_1(int row, int col, int diag);
 
     Utilarray *buf_row_grid = NULL;
     Utilarray *buf_col_grid = NULL;
