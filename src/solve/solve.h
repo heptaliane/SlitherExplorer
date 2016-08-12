@@ -84,4 +84,47 @@ private:
     Checker *checker = NULL;
 };
 
+class Solve {
+public:
+    Solve(const Utilarray &givenRow,
+          const Utilarray &givenCol,
+          const Utilarray &givenCell);
+    ~Solve();
+    void run();
+private:
+    const int node_map[4][3][2] = {
+        {{0}, {0, -1}, {0, -1}},
+        {{1}, {-1, 0}, {-1, 0}},
+        {{0}, {0, 0}, {0, 1}},
+        {{0}, {0, 0}, {1, 0}}
+    };
+
+    void connectEdge(int *edge) const; // search_edge
+    int getEdgeDirection(int row, int col) const; // edge_dir
+    int searchEdge(); // mk_edge_map
+    void setEdge(); //set_edge_list
+
+    void getOtherEdge(int *edge) const; // connectEdge
+    bool isReturned(int direction1, int direction2) const; //isReturn
+
+    bool next();
+    bool setNextCoord(); // set_node
+    void back();
+
+    bool isCompleted() const;
+    bool isAnswer() const;
+
+    Utilarray *row_grid;
+    Utilarray *col_grid;
+    Urilarray *cell;
+    ArrayD<int> *edge_list;
+    ArrayD<int> *edge_map;
+    vector<bool> is_edge_visited;
+    vector<bool> is_skipped;
+    vector<short> node_log;
+    int coord[2];
+    bool is_all_case_considered = false;
+    int cycle = 0;
+    int answer = 0;
+};
 #endif /* SOLVE__H_ */
