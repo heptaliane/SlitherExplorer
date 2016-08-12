@@ -74,6 +74,8 @@ private:
     bool slave0(int row, int col, int diag);
     bool theory3();
     bool slave3_1(int row, int col, int diag);
+    bool slave3_2(int row, int col, int cross);
+    bool slave3_3(int row, int col, int vertex);
 
     Utilarray *buf_row_grid = NULL;
     Utilarray *buf_col_grid = NULL;
