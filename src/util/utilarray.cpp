@@ -85,6 +85,10 @@ void Utilarray::clone(const Utilarray &obj) {
     }
     exportLog(&log);
 }
+void Utilarray::clone(const ArrayD<short> &obj) {
+    array->clone(obj);
+    log.clear();
+}
 void Utilarray::clear(int value) {
     for (int i = 0; i < array->getlen1(); i++) {
         for (int j = 0; j < array->getlen2(); j++) {

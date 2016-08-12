@@ -108,6 +108,7 @@ public:
     void set(int row, int col, int value);
     void undo();
     void clone(const Utilarray &obj);
+    void clone(const ArrayD<short> &obj);
     //delete stored array and its log
     void clear(int value = 0);
     bool equals(const Utilarray &obj) const;

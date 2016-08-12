@@ -35,7 +35,23 @@ void Theory::cpyColGrid(ArrayD<short> *obj) const {
 void Theory::cpyVertex(ArrayD<short> *obj) const {
     buf_vertex->exportArray(obj);
 }
+bool Theory::run() {
+    if (!theory0()) return false;
+    if (!theory3()) return false;
 
+    ArrayD<short> row_temp, col_temp, vertex_temp;
+    buf_row_grid->exportArray(&row_temp);
+    buf_col_grid->exportArray(&col_temp);
+    buf_vertex->exportArray(&vertex_temp);
+
+    if (!checker->checkVertex(&row_temp, &col_temp)) return false;
+    if (!checker->checkCell(&row_temp, &col_temp)) return false;
+    checker->reloadVertex(row_temp, col_temp, &vertex_temp);
+
+    buf_row_grid->clone(row_temp);
+    buf_col_grid->clone(col_temp);
+    buf_vertex->clone(vertex_temp);
+}
 // --- private ---
 void Theory::init(const ArrayD<short> &cell) {
     const int cell_row_size = cell.getlen1();
