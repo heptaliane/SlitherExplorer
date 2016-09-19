@@ -1,6 +1,8 @@
 #ifndef SOLVE_H_
 #define SOLVE_H_
 
+#include <vector>
+#include <map>
 #include "../util/utilarray.h"
 
 class Checker {
@@ -19,8 +21,8 @@ public:
             ArrayD<short> *col_grid
             ) const;
     bool checkCell(
-            ArrayD<short> *row_grid,
-            ArrayD<short> *col_grid
+            const ArrayD<short> &row_grid,
+            const ArrayD<short> &col_grid
             ) const;
 private:
     const int vertex_map[7][2] = {
@@ -86,9 +88,9 @@ private:
 
 class Solve {
 public:
-    Solve(const Utilarray &givenRow,
-          const Utilarray &givenCol,
-          const Utilarray &givenCell);
+    Solve(const Utilarray &kRow,
+          const Utilarray &kCol,
+          const ArrayD<short> &kCell);
     ~Solve();
     void run();
 private:
@@ -96,8 +98,9 @@ private:
         {{0}, {0, -1}, {0, -1}},
         {{1}, {-1, 0}, {-1, 0}},
         {{0}, {0, 0}, {0, 1}},
-        {{0}, {0, 0}, {1, 0}}
+        {{1}, {0, 0}, {1, 0}}
     };
+    const int direction[4] = {2, 3, 0, 1};
 
     void connectEdge(int *edge) const; // search_edge
     int getEdgeDirection(int row, int col) const; // edge_dir
@@ -111,17 +114,22 @@ private:
     bool setNextCoord(); // set_node
     void back();
 
+    bool checkVertex();
+    bool accelerator1();
+
     bool isCompleted() const;
     bool isAnswer() const;
 
-    Utilarray *row_grid;
-    Utilarray *col_grid;
-    Urilarray *cell;
-    ArrayD<int> *edge_list;
-    ArrayD<int> *edge_map;
+    Checker *checker = NULL;
+    Utilarray *row_grid = NULL;
+    Utilarray *col_grid = NULL;
+    ArrayD<short> *cell = NULL;
+    ArrayD<int> *edge_list = NULL;
+    ArrayD<int> *edge_map = NULL;
     vector<bool> is_edge_visited;
     vector<bool> is_skipped;
     vector<short> node_log;
+    vector<pair<int, int> > coord_log;
     int coord[2];
     bool is_all_case_considered = false;
     int cycle = 0;

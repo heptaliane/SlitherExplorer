@@ -117,18 +117,19 @@ bool Checker::checkVertex(ArrayD<short> *row_grid, ArrayD<short> *col_grid) cons
 
         }
     }
+    return true;
 }
-bool Checker::checkCell(ArrayD<short> *row_grid, ArrayD<short> *col_grid) const {
+bool Checker::checkCell(const ArrayD<short> &row_grid, const ArrayD<short> &col_grid) const {
     int cell_point[2];
     short grid[4];
     for (int i = 0; i <= 4; i++) {
         cell_point[0] = 0;
         cell_point[1] = -1;
         while (searchCell(i, cell_point)) {
-            grid[0] = row_grid->getArray(cell_point[0], cell_point[1] - 1);
-            grid[1] = col_grid->getArray(cell_point[0] - 1, cell_point[1]);
-            grid[2] = row_grid->getArray(cell_point[0], cell_point[1]);
-            grid[3] = col_grid->getArray(cell_point[0], cell_point[1]);
+            grid[0] = row_grid.getArray(cell_point[0], cell_point[1] - 1);
+            grid[1] = col_grid.getArray(cell_point[0] - 1, cell_point[1]);
+            grid[2] = row_grid.getArray(cell_point[0], cell_point[1]);
+            grid[3] = col_grid.getArray(cell_point[0], cell_point[1]);
 
             int count = 0;
             for (int j = 0; j < 4; j++)
