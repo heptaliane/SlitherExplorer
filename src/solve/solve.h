@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include "../util/utilarray.h"
+#include "../util/fileuser.h"
 
 class Checker {
 public:
@@ -92,7 +93,7 @@ public:
           const Utilarray &kCol,
           const ArrayD<short> &kCell);
     ~Solve();
-    void run();
+    void run(const string &dst_path);
 private:
     const int node_map[4][3][2] = {
         {{0}, {0, -1}, {0, -1}},
@@ -119,6 +120,7 @@ private:
 
     bool isCompleted() const;
     bool isAnswer();
+    void output(const string &path) const;
 
     Checker *checker = NULL;
     Utilarray *row_grid = NULL;

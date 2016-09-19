@@ -37,7 +37,10 @@ Solve::~Solve() {
 }
 
 //--- public ---
-void Solve::run() {
+void Solve::run(const string &dst_path) {
+    Fileuser fout(dst_path);
+    fout.saveArray(*cell);
+
     while (!is_all_case_considered) {
         if (!next())
             continue;
@@ -51,7 +54,7 @@ void Solve::run() {
         if (isCompleted()) {
             if (isAnswer()) {
                 answer++;
-                // TODO save completed data
+                output(dst_path);
             }
             back();
             continue;
@@ -374,4 +377,12 @@ bool Solve::isAnswer() {
     if (cnt != cycle) return false;
     return true;
 }
+void Solve::output(const string &path) const {
+    Fileuser fout(path);
 
+    ArrayD<short> buf_row, buf_col;
+    row_grid->exportArray(&buf_row);
+    col_grid->exportArray(&buf_col);
+    fout.saveArray(buf_row);
+    fout.saveArray(buf_col);
+}
