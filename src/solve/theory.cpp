@@ -45,7 +45,7 @@ bool Theory::run() {
     buf_vertex->exportArray(&vertex_temp);
 
     if (!checker->checkVertex(&row_temp, &col_temp)) return false;
-    if (!checker->checkCell(&row_temp, &col_temp)) return false;
+    if (!checker->checkCell(row_temp, col_temp)) return false;
     checker->reloadVertex(row_temp, col_temp, &vertex_temp);
 
     buf_row_grid->clone(row_temp);
