@@ -5,6 +5,7 @@ Solve::Solve(const Utilarray &kRow, const Utilarray &kCol, const ArrayD<short> &
     row_grid = new Utilarray(kRow);
     col_grid = new Utilarray(kCol);
     cell = new ArrayD<short>(kCell);
+    vertex = new ArrayD<short>(kCell.getlen1(), kCell.getlen2(), 0);
     checker = new Checker(*cell);
 
     edge_map = new ArrayD<int>(row, col);
@@ -25,6 +26,8 @@ Solve::~Solve() {
     col_grid = NULL;
     delete cell;
     cell = NULL;
+    delete vertex;
+    vertex = NULL;
     delete checker;
     checker = NULL;
     delete edge_map;
@@ -32,6 +35,30 @@ Solve::~Solve() {
     delete edge_list;
     edge_list = NULL;
 }
+
+//--- public ---
+void Solve::run() {
+    while (!is_all_case_considered) {
+        if (!next())
+            continue;
+
+        if (!checkVertex() ||
+                !accelerator1()) {
+            back();
+            continue;
+        }
+
+        if (isCompleted()) {
+            if (isAnswer()) {
+                answer++;
+                // TODO save completed data
+            }
+            back();
+            continue;
+        }
+    }
+}
+
 //--- private ---
 void Solve::connectEdge(int *edge) const {
     int prev = -1, next = -1;
@@ -316,3 +343,35 @@ bool Solve::accelerator1() {
 
     return true;
 }
+bool Solve::isCompleted() const {
+    if (cycle == 0)
+        return false;
+    if (coord_log[0].first != coord[0] ||
+            coord_log[0].second != coord[1])
+        return false;
+
+    return true;
+}
+bool Solve::isAnswer() {
+    ArrayD<short> buf_row, buf_col;
+    row_grid->exportArray(&buf_row);
+    col_grid->exportArray(&buf_col);
+
+    if (!checker->checkCell(buf_row, buf_col))
+        return false;
+
+    checker->reloadVertex(buf_row, buf_col, vertex);
+    int cnt = 0;
+    int row_size = cell->getlen1() + 1;
+    int col_size = cell->getlen2() + 1;
+    for (int row = 0; row < row_size; row++) {
+        for (int col = 0; col < col_size; col++) {
+            if (vertex->getArray(row, col) != 0)
+                cnt += 1;
+        }
+    }
+
+    if (cnt != cycle) return false;
+    return true;
+}
+
