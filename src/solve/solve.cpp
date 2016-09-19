@@ -223,4 +223,96 @@ void Solve::back() {
     coord[1] = coord_log[cycle].second;
     coord_log.pop_back();
 }
+bool Solve::checkVertex() {
+    if (cycle == 1) return true;
+    if (is_all_case_considered) return true;
 
+    int row_size = cell->getlen1() + 1;
+    int col_size = cell->getlen2() + 1;
+    short grid[4];
+    int cnt1, cnt0;
+
+    for (int row = 0; row < row_size; row++) {
+        for (int col = 0; col < col_size; col++) {
+            grid[0] = row_grid->get(row, col - 1, 0);
+            grid[1] = col_grid->get(row - 1, col, 0);
+            grid[2] = row_grid->get(row, col, 0);
+            grid[3] = col_grid->get(row, col, 0);
+
+            cnt1 = 0;
+            cnt0 = 0;
+
+            for (int i = 0; i < 4; i++) {
+                if (grid[i] == 0)
+                    cnt0 += 1;
+                else if (grid[i] == 1)
+                    cnt1 += 1;
+            }
+
+            if (cnt1 > 2)
+                return false;
+            if (cnt1 == 1 && cnt0 == 3)
+                return false;
+        }
+    }
+
+    return true;
+}
+bool Solve::accelerator1() {
+    int coord[2] = {0, -1};
+    int vnode[4][2];
+    short grid[4];
+    int cnt0, cnt2, cnt;
+    int is_grid;
+
+    while (checker->searchCell(3, coord)) {
+        vnode[0][0] = coord[0];
+        vnode[0][1] = coord[1];
+        vnode[1][0] = coord[0];
+        vnode[1][1] = coord[1] + 1;
+        vnode[2][0] = coord[0] + 1;
+        vnode[2][1] = coord[1];
+        vnode[3][0] = coord[0] + 1;
+        vnode[3][1] = coord[1] + 1;
+
+        cnt0 = 0;
+        cnt2 = 0;
+
+        for (int i = 0; i < 4; i++) {
+            grid[0] = row_grid->get(vnode[i][0], vnode[i][1] - 1, 0);
+            grid[1] = col_grid->get(vnode[i][0] - 1, vnode[i][1], 0);
+            grid[2] = row_grid->get(vnode[i][0], vnode[i][1], 0);
+            grid[3] = col_grid->get(vnode[i][0], vnode[i][1], 0);
+
+            cnt = 0;
+            for (int j = 0; j < 4; j++) {
+                if (grid[j] == 1)
+                    cnt += 1;
+            }
+
+            if (cnt = 2) 
+                cnt2 += 1;
+            else if (cnt == 0)
+                cnt0 += 1;
+        }
+
+        if (cnt2 + cnt0 == 4 && cnt0 != 4) {
+            grid[0] = row_grid->get(coord[0], coord[1], 0);
+            grid[1] = col_grid->get(coord[0], coord[1], 0);
+            grid[2] = row_grid->get(coord[0] + 1, coord[1], 0);
+            grid[3] = col_grid->get(coord[0], coord[1] + 1, 0);
+
+            is_grid = 0;
+            for (int k = 0; k < 4; k++) {
+                if (grid[k] == 1)
+                    is_grid += 1;
+            }
+
+            if (is_grid != 3)
+                return false;
+        }
+
+    }
+
+    return true;
+}
