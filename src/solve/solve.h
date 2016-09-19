@@ -118,12 +118,13 @@ private:
     bool accelerator1();
 
     bool isCompleted() const;
-    bool isAnswer() const;
+    bool isAnswer();
 
     Checker *checker = NULL;
     Utilarray *row_grid = NULL;
     Utilarray *col_grid = NULL;
     ArrayD<short> *cell = NULL;
+    ArrayD<short> *vertex = NULL;
     ArrayD<int> *edge_list = NULL;
     ArrayD<int> *edge_map = NULL;
     vector<bool> is_edge_visited;
