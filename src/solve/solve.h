@@ -26,7 +26,7 @@ public:
             ) const;
 private:
     const int vertex_map[7][2] = {
-        {}, {0, 2}, {1, 3}, {0, 1}, {1, 2}. {2, 3}, {3, 0}
+        {}, {0, 2}, {1, 3}, {0, 1}, {1, 2}, {2, 3}, {3, 0}
     };
     ArrayD<short> cell;
     void setVertexGrid(int value, short *grid) const;
@@ -44,7 +44,7 @@ public:
     void cpyVertex(ArrayD<short> *obj) const;
 private:
     const int vertex_map[7][2] = {
-        {}, {0, 2}, {1, 3}, {0, 1}, {1, 2}. {2, 3}, {3, 0}
+        {}, {0, 2}, {1, 3}, {0, 1}, {1, 2}, {2, 3}, {3, 0}
     };
     const int diag_node[4][2] = {
         {-1, -1}, {-1, 1}, {1, -1}, {1, 1}
