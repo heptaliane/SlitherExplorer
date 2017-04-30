@@ -12,18 +12,9 @@ void getVertexGrid(
     grid[3] = cgrid.get(coord.y, coord.x);
 }
 
-void setGridValue(char num, char *grid) {
-
-    for (int i = 0; i < 4; i++) {
-        if (grid[i] == 2) {
-            grid[i] = num;
-        }
-    }
-}
-
 void applyVertexGrid(
         const Coord &coord,
-        Matrix *rgrid, Matrix *cgrid, char *grid) {
+        Matrix* rgrid, Matrix* cgrid, char* grid) {
 
     rgrid->set(coord.y, coord.x - 1, grid[0]);
     cgrid->set(coord.y - 1, coord.x, grid[1]);
@@ -31,7 +22,62 @@ void applyVertexGrid(
     cgrid->set(coord.y, coord.x, grid[3]);
 }
 
-void checkGridStatus(char *grid, int *count0, int *count1) {
+void getCellGrid(
+        const Coord &coord, const Matrix &rgrid,
+        const Matrix &cgrid, char* grid) {
+
+    grid[0] = rgrid.get(coord.y, coord.x);
+    grid[1] = cgrid.get(coord.y, coord.x);
+    grid[2] = rgrid.get(coord.y + 1, coord.x);
+    grid[3] = cgrid.get(coord.y, coord.x + 1);
+}
+
+void applyCellGrid(
+        const Coord &coord, Matrix* rgrid, Matrix* cgrid, char* grid) {
+
+    rgrid->set(coord.y, coord.x, grid[0]);
+    cgrid->set(coord.y, coord.x, grid[1]);
+    rgrid->set(coord.y + 1, coord.x, grid[2]);
+    cgrid->set(coord.y, coord.x + 1, grid[3]);
+}
+
+void getDiagonalGrid(
+        const Coord &coord, const Matrix &cell,
+        const Matrix &rgrid, const Matrix &cgrid, char* grid) {
+
+    grid[0] = rgrid.get(coord.y, coord.x - 1);
+    grid[1] = cgrid.get(coord.y - 1, coord.x);
+    grid[2] = rgrid.get(coord.y, coord.x + 1);
+    grid[3] = cgrid.get(coord.y - 1, coord.x + 1);
+    grid[4] = rgrid.get(coord.y + 1, coord.x - 1);
+    grid[5] = cgrid.get(coord.y + 1, coord.x);
+    grid[6] = rgrid.get(coord.y + 1, coord.x + 1);
+    grid[7] = cgrid.get(coord.y + 1, coord.x + 1);
+}
+
+void applyDiagonalGrid(
+        const Coord &coord, Matrix* rgrid, Matrix* cgrid, char* grid) {
+
+    rgrid->set(coord.y, coord.x - 1, grid[0]);
+    cgrid->set(coord.y - 1, coord.x, grid[1]);
+    rgrid->set(coord.y, coord.x + 1, grid[2]);
+    cgrid->set(coord.y - 1, coord.x + 1, grid[3]);
+    rgrid->set(coord.y + 1, coord.x - 1, grid[4]);
+    cgrid->set(coord.y + 1, coord.x, grid[5]);
+    rgrid->set(coord.y + 1, coord.x + 1, grid[6]);
+    cgrid->set(coord.y + 1, coord.x + 1, grid[7]);
+}
+
+void getDiagonalCell(
+        const Coord coord, const Matrix &cell, char* dcell) {
+
+    dcell[0] = cell.get(coord.y - 1, coord.x - 1);
+    dcell[1] = cell.get(coord.y - 1, coord.x + 1);
+    dcell[2] = cell.get(coord.y + 1, coord.x - 1);
+    dcell[3] = cell.get(coord.y + 1, coord.x + 1);
+}
+
+void checkGridStatus(char* grid, int* count0, int* count1) {
 
     int cnt0 = 0, cnt1 = 0;
 
@@ -48,14 +94,35 @@ void checkGridStatus(char *grid, int *count0, int *count1) {
     *count1 = cnt1;
 }
 
-void getCellGrid(
-        const Coord &coord, const Matrix &rgrid,
-        const Matrix &cgrid, char *grid) {
+void setGridValue(char num, char* grid) {
 
-    grid[0] = rgrid.get(coord.y, coord.x);
-    grid[1] = cgrid.get(coord.y, coord.x);
-    grid[2] = rgrid.get(coord.y + 1, coord.x);
-    grid[3] = cgrid.get(coord.y, coord.x + 1);
+    for (int i = 0; i < 4; i++) {
+        if (grid[i] == 2) {
+            grid[i] = num;
+        }
+    }
+}
+
+bool applyDiagonalTheoryWith0Slave(char cell, Coord* grid) {
+
+    if (cell == 1) {
+        if (grid->y == 1 || grid->x == 1) {
+            return false;
+        } else if (grid->y == 2 || grid->x == 2) {
+            grid->y = 0;
+            grid->x = 0;
+        }
+
+    } else if (cell == 3) {
+        if (grid->y == 0 || grid->x == 0) {
+            return false;
+        } else if (grid->y == 2 || grid->x == 2) {
+            grid->y = 1;
+            grid->x = 1;
+        }
+    }
+
+    return true;
 }
 
 }
@@ -114,11 +181,9 @@ bool searchCell(const Matrix &cell, char num, Coord* coord) {
     return false;
 }
 
-bool checkCell(const Matrix &cell, const Matrix &rgrid, const Matrix &cgrid) {
+bool setGridWithCell(const Matrix &cell, Matrix* rgrid, Matrix* cgrid) {
 
     Coord coord;
-    int row = cell.rows();
-    int col = cell.cols();
     char grid[4];
     int cnt0, cnt1;
 
@@ -127,7 +192,7 @@ bool checkCell(const Matrix &cell, const Matrix &rgrid, const Matrix &cgrid) {
         coord.y = 0;
 
         while (searchCell(cell, i, &coord)) {
-            getCellGrid(coord, rgrid, cgrid, grid);
+            getCellGrid(coord, *rgrid, *cgrid, grid);
             checkGridStatus(grid, &cnt0, &cnt1);
 
             if (cnt1 > i) {
@@ -136,6 +201,14 @@ bool checkCell(const Matrix &cell, const Matrix &rgrid, const Matrix &cgrid) {
             if (cnt0 > 4 - i) {
                 return false;
             }
+
+            if (cnt1 != i && cnt0 == 4 - i) {
+                setGridValue(1, grid);
+            } else if (cnt0 != 4 - i && cnt1 == i) {
+                setGridValue(0, grid);
+            }
+
+            applyCellGrid(coord, rgrid, cgrid, grid);
         }
     }
 
@@ -170,4 +243,29 @@ bool setGridWithVertex(Matrix *rgrid, Matrix *cgrid) {
     }
 
     return true;
+}
+
+bool applyDiagonalTheoryWith0(
+        const Matrix &cell, Matrix* rgrid, Matrix* cgrid) {
+
+    Coord coord(-1, 0);
+    char grid[4];
+    char dcell[4];
+    Coord pair;
+    int i;
+
+    while (searchCell(cell, 0, &coord)) {
+        getDiagonalCell(coord, cell, dcell);
+        getDiagonalGrid(coord, cell, *rgrid, *cgrid, grid);
+
+        for (i = 0; i < 4; i++) {
+            pair.x = grid[i * 4];
+            pair.y = grid[i * 4 + 1];
+            if (!applyDiagonalTheoryWith0Slave(dcell[i], &pair)) {
+                return false;
+            }
+        }
+
+        applyDiagonalGrid(coord, rgrid, cgrid, grid);
+    }
 }

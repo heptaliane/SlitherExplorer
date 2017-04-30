@@ -5,8 +5,11 @@
 
 bool searchCell(const Matrix &cell, char num, Coord* coord);
 
-bool checkCell(const Matrix &cell, const Matrix &rgrid, const Matrix &cgrid);
+bool setGridWithCell(const Matrix &cell, Matrix* rgrid, Matrix* cgrid);
 
-bool setGridWithVertex(Matrix *rgrid, Matrix *cgrid);
+bool setGridWithVertex(Matrix* rgrid, Matrix* cgrid);
+
+bool applyDiagonalTheoryWith0(
+        const Matrix &cell, Matrix* rgrid, Matrix* cgrid);
 
 #endif /* DEFINITE_H_ */
