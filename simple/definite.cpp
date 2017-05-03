@@ -167,6 +167,21 @@ bool applyCrossTheoryWith3Slave(int idx, char cell, char* grid) {
     return true;
 }
 
+static const int connectEdgePairSlave[8] = {
+    -1, 0, 0, -1, 1, 0, 0, 1
+};
+
+int getDirection(int prev, char* grid) {
+
+    for (int i = 0; i < 4; ++i) {
+        if (grid[i] == 1 && i != prev) {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
 // for debug
 void seeMatrix(const Matrix &mat) {
     for (int i = 0; i < mat.rows(); ++i) {
@@ -243,6 +258,61 @@ bool searchCell(const Matrix &cell, char num, Coord* coord) {
     return false;
 }
 
+bool searchEdge(
+        const Matrix &rgrid, const Matrix &cgrid, Coord* coord) {
+
+    int row = rgrid.rows();
+    int col = cgrid.cols();
+
+    coord->x++;
+    char grid[4];
+    int cnt0, cnt1;
+
+    for ( ; coord->y < row; coord->y++) {
+        for ( ; coord->x < col; coord->x++) {
+            getVertexGrid(*coord, rgrid, cgrid, grid);
+            checkGridStatus(grid, &cnt0, &cnt1);
+
+            if (cnt1 == 1) {
+                return true;
+            }
+        }
+
+        coord->x = 0;
+    }
+
+    return false;
+}
+
+bool connectEdgePair(
+        const Coord &coord, const Matrix &rgrid,
+        const Matrix &cgrid, Coord* edge) {
+
+    int direction = -1;
+    char grid[4];
+    edge->x = coord.x;
+    edge->y = coord.y;
+
+    while (true) {
+        getVertexGrid(*edge, rgrid, cgrid, grid);
+        direction = getDirection(direction, grid);
+
+        if (direction == -1) {
+            return true;
+        }
+
+        edge->x += connectEdgePairSlave[direction * 2];
+        edge->y += connectEdgePairSlave[direction * 2 + 1];
+        direction = (2 & ~direction) + (1 & direction);
+
+        if (coord.x == edge->x && coord.y == edge->y) {
+            break;
+        }
+    }
+
+    return false;
+}
+
 bool setGridWithCell(const Matrix &cell, Matrix* rgrid, Matrix* cgrid) {
 
     Coord coord;
@@ -277,6 +347,7 @@ bool setGridWithCell(const Matrix &cell, Matrix* rgrid, Matrix* cgrid) {
     return true;
 }
 
+
 bool setGridWithVertex(Matrix *rgrid, Matrix *cgrid) {
 
     Coord coord;
@@ -305,6 +376,85 @@ bool setGridWithVertex(Matrix *rgrid, Matrix *cgrid) {
     }
 
     return true;
+}
+
+bool setGridWithEdgePair(const Matrix &cell, Matrix* rgrid, Matrix* cgrid) {
+
+    Coord coord(-1, 0);
+    Coord edge;
+    char grid[4];
+    bool flg = isSatisfiedAboutCell(cell, *rgrid, *cgrid);
+    flg &= isSatisfiedAboutEdge(*rgrid, *cgrid);
+
+    while (searchEdge(*rgrid, *cgrid, &coord)) {
+        if (!connectEdgePair(coord, *rgrid, *cgrid, &edge)) {
+            return false;
+        }
+
+        if (edge.x == coord.x + 1 && edge.y == coord.y) {
+            if (!flg && rgrid->get(coord.y, coord.x) != 1) {
+                rgrid->set(coord.y, coord.x, 0);
+            } else if (flg) {
+                rgrid->set(coord.y, coord.x, 1);
+            }
+
+        } else if (edge.y == coord.y + 1 && edge.x == coord.x) {
+            if (!flg && cgrid->get(coord.y, coord.x) != 1) {
+                cgrid->set(coord.y, coord.x, 0);
+            } else if (flg) {
+                cgrid->set(coord.y, coord.x, 1);
+            }
+        }
+    }
+
+    return true;
+}
+
+bool isSatisfiedAboutCell(
+        const Matrix &cell, const Matrix &rgrid, const Matrix &cgrid) {
+
+    Coord coord;
+    char grid[4];
+    int cnt0, cnt1;
+
+    for (coord.y = 0; coord.y < cell.rows(); coord.y++) {
+        for (coord.x = 0; coord.x < cell.cols(); coord.x++) {
+            if (cell.get(coord.y, coord.x) == 4) {
+                continue;
+            }
+
+            getCellGrid(coord, rgrid, cgrid, grid);
+            checkGridStatus(grid, &cnt0, &cnt1);
+            if (cnt1 != cell.get(coord.y, coord.x)) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+bool isSatisfiedAboutEdge(const Matrix &rgrid, const Matrix &cgrid) {
+
+    Coord coord;
+    char grid[4];
+    int cnt0, cnt1;
+    int cnt = 0;
+    int row = rgrid.rows() - 1;
+    int col = cgrid.cols() - 1;
+
+    for (coord.y = 0; coord.y < row; coord.y++) {
+        for (coord.x = 0; coord.x < col; coord.x++) {
+            getVertexGrid(coord, rgrid, cgrid, grid);
+            checkGridStatus(grid, &cnt0, &cnt1);
+
+            if (cnt1 == 1) {
+                ++cnt;
+            }
+        }
+    }
+
+    return cnt < 3;
 }
 
 bool applyDiagonalTheoryWith0(
@@ -477,6 +627,7 @@ bool applyDefinite(const Matrix &cell, Matrix* rgrid, Matrix *cgrid) {
         flg &= applyDiagonalTheoryWith2(cell, rgrid, cgrid);
         flg &= applyDiagonalTheoryWith3(cell, rgrid, cgrid);
         flg &= applyCrossTheoryWith3(cell, rgrid, cgrid);
+        flg &= setGridWithEdgePair(cell, rgrid, cgrid);
 
         if (!flg) {
             return false;
