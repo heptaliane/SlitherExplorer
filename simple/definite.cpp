@@ -1,4 +1,5 @@
 #include "definite.h"
+#include <iostream>
 
 namespace {
 
@@ -42,8 +43,8 @@ void applyCellGrid(
 }
 
 void getDiagonalGrid(
-        const Coord &coord, const Matrix &cell,
-        const Matrix &rgrid, const Matrix &cgrid, char* grid) {
+        const Coord &coord, const Matrix &rgrid,
+        const Matrix &cgrid, char* grid) {
 
     grid[0] = rgrid.get(coord.y, coord.x - 1);
     grid[1] = cgrid.get(coord.y - 1, coord.x);
@@ -124,7 +125,6 @@ bool applyDiagonalTheoryWith0Slave(char cell, Coord* grid) {
 
     } else if (cell == 3) {
         if (grid->y == 0 || grid->x == 0) {
-            return false;
         } else if (grid->y == 2 || grid->x == 2) {
             grid->y = 1;
             grid->x = 1;
@@ -138,27 +138,53 @@ static const int applyDiagonalTheoryWith1Slave[8] = {
     2, 3, 1, 2, 0, 3, 0, 1,
 };
 
-void applyDiagonalTheoryWith2Slave(int idx, char *grid) {
+bool applyDiagonalTheoryWith2Slave(int idx, char* grid) {
 
-    if (grid[idx * 4] == 0 && grid[idx * 4 + 1] == 0) {
-        int opp = (idx + 2) % 4;
-        grid[opp * 4] = 0;
-        grid[opp * 4 + 1] = 0;
+    if (grid[idx * 2] != 2 && grid[idx * 2] == grid[idx * 2 + 1]) {
+        return false;
     }
+
+    if (grid[idx * 2] == 0 && grid[idx * 2 + 1] == 2) {
+        grid[idx * 2 + 1] = 1;
+    } else if (grid[idx * 2 + 1] == 0 && grid[idx * 2] == 2) {
+        grid[idx * 2] = 1;
+    }
+
+    return true;
 }
 
 bool applyCrossTheoryWith3Slave(int idx, char cell, char* grid) {
 
     if (cell == 3) {
-        if (grid[idx % 2] == 0 || grid[idx % 2 + 1] == 0) {
+        if (grid[idx % 2] == 0 || grid[idx % 2 + 2] == 0) {
             return false;
         }
 
         grid[idx % 2] = 1;
-        grid[idx % 2 + 1] = 1;
+        grid[idx % 2 + 2] = 1;
     }
 
     return true;
+}
+
+// for debug
+void seeMatrix(const Matrix &mat) {
+    for (int i = 0; i < mat.rows(); ++i) {
+        for (int j = 0; j < mat.cols(); ++j) {
+            std::cout << +mat.get(i, j) << ' ';
+        }
+        std::cout << std::endl;
+    }
+}
+
+void seeGrid8(char* grid) {
+    for (int i = 0; i < 8; ++i) {
+        if (grid[i] == -1) 
+            std::cout << '-' << ' ';
+        else
+            std::cout << +grid[i] << ' ';
+    }
+    std::cout << std::endl;
 }
 
 }
@@ -292,14 +318,16 @@ bool applyDiagonalTheoryWith0(
 
     while (searchCell(cell, 0, &coord)) {
         getDiagonalCell(coord, cell, dcell);
-        getDiagonalGrid(coord, cell, *rgrid, *cgrid, grid);
+        getDiagonalGrid(coord, *rgrid, *cgrid, grid);
 
         for (i = 0; i < 4; i++) {
-            pair.x = grid[i * 4];
-            pair.y = grid[i * 4 + 1];
+            pair.x = static_cast<int>(grid[i * 2]);
+            pair.y = static_cast<int>(grid[i * 2 + 1]);
             if (!applyDiagonalTheoryWith0Slave(dcell[i], &pair)) {
                 return false;
             }
+            grid[i * 2] = pair.x;
+            grid[i * 2 + 1] = pair.y;
         }
 
         applyDiagonalGrid(coord, rgrid, cgrid, grid);
@@ -318,20 +346,20 @@ bool applyDiagonalTheoryWith1(
     int i;
 
     while (searchCell(cell, 1, &coord)) {
-        getDiagonalGrid(coord, cell, *rgrid, *cgrid, grid);
+        getDiagonalGrid(coord, *rgrid, *cgrid, grid);
         getCellGrid(coord, *rgrid, *cgrid, dgrid);
 
         for (i = 0; i < 4; i++) {
-            if ((grid[i * 4] == 1 && grid[i * 4 + 1] == 0)
-                    || (grid[i * 4] == 0 && grid[i * 4 + 1] == 1)) {
+            if ((grid[i * 2] == 1 && grid[i * 2 + 1] == 0)
+                    || (grid[i * 2] == 0 && grid[i * 2 + 1] == 1)) {
 
-                if (dgrid[applyDiagonalTheoryWith1Slave[i * 4]] == 1 ||
-                        dgrid[applyDiagonalTheoryWith1Slave[i * 4 + 1]] == 1) {
+                if (dgrid[applyDiagonalTheoryWith1Slave[i * 2]] == 1 ||
+                        dgrid[applyDiagonalTheoryWith1Slave[i * 2 + 1]] == 1) {
                     return false;
                 }
 
-                dgrid[applyDiagonalTheoryWith1Slave[i * 4]] = 0;
-                dgrid[applyDiagonalTheoryWith1Slave[i * 4 + 1]] = 0;
+                dgrid[applyDiagonalTheoryWith1Slave[i * 2]] = 0;
+                dgrid[applyDiagonalTheoryWith1Slave[i * 2 + 1]] = 0;
             }
         }
 
@@ -346,25 +374,22 @@ bool applyDiagonalTheoryWith2(
 
     Coord coord(-1, 0);
     char grid[8];
-    int i, cnt;
+    int i;
+    bool flg = true;
 
     while (searchCell(cell, 2, &coord)) {
-        getDiagonalGrid(coord, cell, *rgrid, *cgrid, grid);
+        getDiagonalGrid(coord, *rgrid, *cgrid, grid);
+        for (i = 0; i < 4; ++i) {
+            if (grid[i * 2] == 0 && grid[i * 2 + 1] == 0) {
+                flg &= applyDiagonalTheoryWith2Slave((2 & i) + (1 & ~i), grid);
+                flg &= applyDiagonalTheoryWith2Slave((2 & ~i) + (1 & i), grid);
+            }
 
-        for (i = 0; i < 4; i++) {
-            applyDiagonalTheoryWith2Slave(i, grid);
-        }
-
-        cnt = 0;
-        for (i = 0; i < 8; i++) {
-            if (grid[i] == 0) {
-                cnt++;
+            if (!flg) {
+                return false;
             }
         }
-
-        if (cnt == 8) {
-            return false;
-        }
+        applyDiagonalGrid(coord, rgrid, cgrid, grid);
     }
 
     return true;
@@ -382,22 +407,22 @@ bool applyDiagonalTheoryWith3(
     int i;
 
     while (searchCell(cell, 3, &coord)) {
-        getDiagonalGrid(coord, cell, *rgrid, *cgrid, grid);
+        getDiagonalGrid(coord, *rgrid, *cgrid, grid);
         getCellGrid(coord, *rgrid, *cgrid, dgrid);
         getDiagonalCell(coord, cell, dcell);
 
         for (i = 0; i < 4; i++) {
-            if (dcell[i] == 3 || grid[i * 4] == 1 || grid[i * 4 + 1] == 1) {
-                if (dgrid[applyDiagonalTheoryWith1Slave[i * 4]] == 0 ||
-                        dgrid[applyDiagonalTheoryWith1Slave[i * 4 + 1]] == 0) {
+            if (dcell[i] == 3 || grid[i * 2] == 1 || grid[i * 2 + 1] == 1) {
+                if (dgrid[applyDiagonalTheoryWith1Slave[i * 2]] == 0 ||
+                        dgrid[applyDiagonalTheoryWith1Slave[i * 2 + 1]] == 0) {
                     return false;
                 }
 
-                dgrid[applyDiagonalTheoryWith1Slave[i * 4]] = 1;
-                dgrid[applyDiagonalTheoryWith1Slave[i * 4 + 1]] = 1;
+                dgrid[applyDiagonalTheoryWith1Slave[i * 2]] = 1;
+                dgrid[applyDiagonalTheoryWith1Slave[i * 2 + 1]] = 1;
             }
 
-            if (grid[i * 4] == 0 && grid[i * 4 + 1] == 0) {
+            if (grid[i * 2] == 0 && grid[i * 2 + 1] == 0) {
                 vertex.x = coord.x + (i % 2);
                 vertex.y = coord.y + (i - (i % 2)) / 2;
                 getVertexGrid(vertex, *rgrid, *cgrid, vgrid);
@@ -431,6 +456,34 @@ bool applyCrossTheoryWith3(
         }
 
         applyCellGrid(coord, rgrid, cgrid, grid);
+    }
+
+    return true;
+}
+
+bool applyDefinite(const Matrix &cell, Matrix* rgrid, Matrix *cgrid) {
+
+    Matrix rprev(*rgrid), cprev(*cgrid);
+    bool flg = true;
+
+    while (true) {
+        flg &= setGridWithCell(cell, rgrid, cgrid);
+        flg &= setGridWithVertex(rgrid, cgrid);
+        flg &= applyDiagonalTheoryWith0(cell, rgrid, cgrid);
+        flg &= applyDiagonalTheoryWith1(cell, rgrid, cgrid);
+        flg &= applyDiagonalTheoryWith2(cell, rgrid, cgrid);
+        flg &= applyDiagonalTheoryWith3(cell, rgrid, cgrid);
+        flg &= applyCrossTheoryWith3(cell, rgrid, cgrid);
+
+        if (!flg) {
+            return false;
+        }
+        if (rprev.equals(*rgrid) && cprev.equals(*cgrid)) {
+            break;
+        }
+
+        rprev.copy(*rgrid);
+        cprev.copy(*cgrid);
     }
 
     return true;
