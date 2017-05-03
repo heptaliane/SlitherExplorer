@@ -1,16 +1,14 @@
 #include "slarray.h"
 
 
-const char Matrix::exception = 0xff;
-
 Matrix::Matrix(int row, int col, char value) :
-    width(col), height(row), array(new char[col * row]) {
+    exception(0xff), width(col), height(row), array(new char[col * row]) {
 
     init(value);
 }
 
 Matrix::Matrix(const Matrix &obj) :
-    width(obj.cols()), height(obj.rows()),
+    exception(obj.get(-1, 0)), width(obj.cols()), height(obj.rows()),
     array(new char[obj.cols() * obj.rows()]) {
 
     copy(obj);
@@ -53,16 +51,36 @@ void Matrix::resize(int row, int col) {
     init(0);
 }
 
+void Matrix::setExceptValue(char value) {
+    exception = value;
+}
+
 void Matrix::copy(const Matrix &obj) {
 
     resize(obj.rows(), obj.cols());
 
-    const char* pointer = obj.getPointer();
+    const char* ptr = obj.getPointer();
 
-    for (int i = 0; i < height * width; i++) {
-        array[i] = *pointer;
-        pointer++;
+    for (int i = 0; i < height * width; ++i) {
+        array[i] = *ptr;
+        ++ptr;
     }
 }
 
+bool Matrix::equals(const Matrix &obj) const {
+
+    if (obj.rows() != height || obj.cols() != width) {
+        return false;
+    }
+
+    const char* ptr = obj.getPointer();
+    for (int i = 0; i < height * width; ++i) {
+        if (*ptr != array[i]) {
+            return false;
+        }
+        ++ptr;
+    }
+
+    return true;
+}
 

@@ -24,4 +24,6 @@ bool applyDiagonalTheoryWith3(
 bool applyCrossTheoryWith3(
         const Matrix &cell, Matrix* rgrid, Matrix* cgrid);
 
+bool applyDefinite(const Matrix &cell, Matrix* rgrid, Matrix* cgrid);
+
 #endif /* DEFINITE_H_ */

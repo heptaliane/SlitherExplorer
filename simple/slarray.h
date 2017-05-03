@@ -24,7 +24,7 @@ class Matrix {
 public:
 
     Matrix() :
-        width(0), height(0), array(NULL) {};
+        exception(0xff), width(0), height(0), array(NULL) {};
 
     Matrix(int row, int col, char value = 0);
 
@@ -43,8 +43,12 @@ public:
 
     void resize(int row, int col);
 
+    void setExceptValue(char value);
+
     // copy matrix
     void copy(const Matrix &obj);
+
+    bool equals(const Matrix &obj) const;
 
     // get first pointer
     const char* getPointer() const {
@@ -63,7 +67,7 @@ private:
         return (row < height) && (col < width) && (row >= 0) && (col >= 0);
     }
 
-    static const char exception;
+    char exception;
     int width;
     int height;
     char* array;

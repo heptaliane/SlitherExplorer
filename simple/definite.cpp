@@ -463,6 +463,9 @@ bool applyCrossTheoryWith3(
 
 bool applyDefinite(const Matrix &cell, Matrix* rgrid, Matrix *cgrid) {
 
+    rgrid->setExceptValue(0);
+    cgrid->setExceptValue(0);
+
     Matrix rprev(*rgrid), cprev(*cgrid);
     bool flg = true;
 
