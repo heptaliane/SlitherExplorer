@@ -2,7 +2,7 @@
 
 const std::string LocalFileDealer::identifier = "slitherlink";
 
-const int LocalFileDealer::headerSize = 13;
+const int LocalFileDealer::headerSize = 14;
 
 void LocalFileDealer::popMatrix(Matrix *mat) {
 
@@ -14,8 +14,8 @@ void LocalFileDealer::popMatrix(Matrix *mat) {
     mat->resize(width, height);
 
     int i, j;
-    for (i = 0; i < height; i++) {
-        for (j = 0; j < width; j++) {
+    for (i = height - 1; i >= 0; --i) {
+        for (j = width - 1; j >= 0; --j) {
             mat->set(i, j, data.back());
             data.pop_back();
         }
@@ -44,20 +44,21 @@ void LocalFileDealer::pushMatrix(const Matrix &mat) {
 void LocalFileDealer::read(const std::string &path) {
 
     std::ifstream fin(path, std::ios::binary);
+    clear();
 
     char c;
-    for (int i = 0; i < headerSize; i++) {
+    for (int i = 0; i < headerSize; ++i) {
         fin.read(&c, sizeof(c));
         header.push_back(c);
     }
-    while (!fin.eof()) {
+    readHeader();
+
+    for (int i = 0; i < width * height * length; ++i) {
         fin.read(&c, sizeof(c));
         data.push_back(c);
     }
 
     fin.close();
-
-    readHeader();
 }
 
 void LocalFileDealer::write(const std::string &path) {
@@ -97,12 +98,12 @@ void LocalFileDealer::writeHeader() {
 
 void LocalFileDealer::readHeader() {
 
-    length = data.back();
-    data.pop_back();
-    height = data.back();
-    data.pop_back();
-    width = data.back();
-    data.pop_back();
+    length = header.back();
+    header.pop_back();
+    height = header.back();
+    header.pop_back();
+    width = header.back();
+    header.pop_back();
 }
 
 
