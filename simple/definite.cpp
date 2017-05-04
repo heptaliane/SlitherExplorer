@@ -153,6 +153,49 @@ bool applyDiagonalTheoryWith2Slave(int idx, char* grid) {
     return true;
 }
 
+bool applyDiagonalTheoryWith3Slave(
+        const Coord &coord, const Matrix &cell, const Matrix &rgrid,
+        const Matrix &cgrid, int idx) {
+
+    char dgrid[8];
+    Coord crd(coord.x + (1 & idx) - (1 & ~idx), coord.y + (2 & idx) - 1);
+
+    if (cell.get(crd.y, crd.x) == 2) {
+        getDiagonalGrid(crd, rgrid, cgrid, dgrid);
+        int opp1 = (1 & idx) + (2 & ~idx), opp2 = (1 & ~idx) + (2 & idx);
+
+        return (dgrid[opp1 * 2] == 0 && dgrid[opp1 * 2 + 1] == 0) ||
+            (dgrid[opp2 * 2] == 0 && dgrid[opp2 * 2 + 1] == 0);
+    }
+
+    return false;
+}
+
+static const int applyCrossTheoryWith1SlaveArray[16] = {
+    0, -1, 0, 1, -1, 0, 1, 0, 1, -1, 1, 1, -1, 1, 1, 1
+};
+
+bool applyCrossTheoryWith1Slave(
+        const Coord &coord, const Matrix &grid,
+        char cell, int idx, char* crsgrid) {
+
+    if (cell != 1) {
+        return true;
+    }
+
+    if (grid.get(coord.y + applyCrossTheoryWith1SlaveArray[idx * 4],
+                coord.x + applyCrossTheoryWith1SlaveArray[idx * 4 + 1]) == 0 ||
+            grid.get(coord.x + applyCrossTheoryWith1SlaveArray[idx * 4 + 2],
+                coord.x + applyCrossTheoryWith1SlaveArray[idx * 4 + 3]) == 0) {
+        if (*crsgrid == 1) {
+            return false;
+        }
+
+        *crsgrid = 0;
+    }
+    return true;
+}
+
 bool applyCrossTheoryWith3Slave(int idx, char cell, char* grid) {
 
     if (cell == 3) {
@@ -347,7 +390,6 @@ bool setGridWithCell(const Matrix &cell, Matrix* rgrid, Matrix* cgrid) {
     return true;
 }
 
-
 bool setGridWithVertex(Matrix *rgrid, Matrix *cgrid) {
 
     Coord coord;
@@ -440,8 +482,8 @@ bool isSatisfiedAboutEdge(const Matrix &rgrid, const Matrix &cgrid) {
     char grid[4];
     int cnt0, cnt1;
     int cnt = 0;
-    int row = rgrid.rows() - 1;
-    int col = cgrid.cols() - 1;
+    int row = rgrid.rows();
+    int col = cgrid.cols();
 
     for (coord.y = 0; coord.y < row; coord.y++) {
         for (coord.x = 0; coord.x < col; coord.x++) {
@@ -562,7 +604,9 @@ bool applyDiagonalTheoryWith3(
         getDiagonalCell(coord, cell, dcell);
 
         for (i = 0; i < 4; i++) {
-            if (dcell[i] == 3 || grid[i * 2] == 1 || grid[i * 2 + 1] == 1) {
+            if (dcell[i] == 3 || grid[i * 2] == 1 || grid[i * 2 + 1] == 1 ||
+                    applyDiagonalTheoryWith3Slave(
+                        coord, cell, *rgrid, *cgrid, i)) {
                 if (dgrid[applyDiagonalTheoryWith1Slave[i * 2]] == 0 ||
                         dgrid[applyDiagonalTheoryWith1Slave[i * 2 + 1]] == 0) {
                     return false;
@@ -582,6 +626,30 @@ bool applyDiagonalTheoryWith3(
 
             applyCellGrid(coord, rgrid, cgrid, dgrid);
         }
+    }
+
+    return true;
+}
+
+bool applyCrossTheoryWith1(
+        const Matrix &cell, Matrix* rgrid, Matrix *cgrid) {
+
+    Coord coord(-1, 0);
+    char ccell[4];
+    char grid[4];
+    int i;
+    bool flg = true;
+
+    while (searchCell(cell, 1, &coord)) {
+        getCrossCell(coord, cell, ccell);
+        getCellGrid(coord, *rgrid, *cgrid, grid);
+
+        flg &= applyCrossTheoryWith1Slave(coord, *rgrid, ccell[0], 0, &grid[0]);
+        flg &= applyCrossTheoryWith1Slave(coord, *cgrid, ccell[1], 1, &grid[1]);
+        flg &= applyCrossTheoryWith1Slave(coord, *rgrid, ccell[2], 2, &grid[2]);
+        flg &= applyCrossTheoryWith1Slave(coord, *cgrid, ccell[3], 3, &grid[3]);
+
+        applyCellGrid(coord, rgrid, cgrid, grid);
     }
 
     return true;
@@ -626,6 +694,7 @@ bool applyDefinite(const Matrix &cell, Matrix* rgrid, Matrix *cgrid) {
         flg &= applyDiagonalTheoryWith1(cell, rgrid, cgrid);
         flg &= applyDiagonalTheoryWith2(cell, rgrid, cgrid);
         flg &= applyDiagonalTheoryWith3(cell, rgrid, cgrid);
+        flg &= applyCrossTheoryWith1(cell, rgrid, cgrid);
         flg &= applyCrossTheoryWith3(cell, rgrid, cgrid);
         flg &= setGridWithEdgePair(cell, rgrid, cgrid);
 
