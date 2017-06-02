@@ -77,7 +77,6 @@ int main(int argc, char** argv) {
     }
 
     ImageBuilder img("graphics.dat");
-    img.write("test.png", cell, rgrid, cgrid, vertex);
     executeSearch(cell, &rgrid, &cgrid);
     img.write(argv[2], cell, rgrid, cgrid, vertex);
 }
