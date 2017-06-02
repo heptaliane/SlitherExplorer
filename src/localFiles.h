@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <regex>
 #include <vector>
 #include <string>
 #include <opencv2/core.hpp>

@@ -1,5 +1,6 @@
 #include "localFiles.h"
 
+
 const std::string LocalFileDealer::identifier = "slitherlink";
 
 const int LocalFileDealer::headerSize = 14;
