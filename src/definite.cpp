@@ -505,6 +505,57 @@ bool isSatisfiedAboutEdge(const Matrix &rgrid, const Matrix &cgrid) {
     return cnt < 3;
 }
 
+bool isSatisfiedAboutCircle(const Matrix &rgrid, const Matrix &cgrid) {
+
+    Coord coord, edge;
+    int row = rgrid.rows();
+    int col = cgrid.cols();
+    int cnt = 0;
+    int ccnt = 0;
+    int cnt0, cnt1;
+    int direction = -1;
+    char grid[4];
+
+    for (coord.y = 0; coord.y < row; coord.y++) {
+        for (coord.x = 0; coord.x < col; coord.x++) {
+            getVertexGrid(coord, rgrid, cgrid, grid);
+            checkGridStatus(grid, &cnt0, &cnt1);
+            if (cnt1 == 2) {
+                ++cnt;
+                edge.x = coord.x;
+                edge.y = coord.y;
+            }
+        }
+    }
+
+    coord.x = edge.x;
+    coord.y = edge.y;
+
+    while (true) {
+        getVertexGrid(edge, rgrid, cgrid, grid);
+        direction = getDirection(direction, grid);
+
+        if (direction == -1) {
+            return true;
+        }
+
+        edge.x += connectEdgePairSlave[direction * 2];
+        edge.y += connectEdgePairSlave[direction * 2 + 1];
+        direction = (2 & ~direction) + (1 & direction);
+
+        ++ccnt;
+        if (coord.x == edge.x && coord.y == edge.y) {
+            break;
+        }
+    }
+
+    if (ccnt == cnt) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 bool applyDiagonalTheoryWith0(
         const Matrix &cell, Matrix* rgrid, Matrix* cgrid) {
 
@@ -717,5 +768,10 @@ bool applyDefinite(const Matrix &cell, Matrix* rgrid, Matrix *cgrid) {
         cprev.copy(*cgrid);
     }
 
+    Coord coord(-1, 0);
+    if (!searchEdge(*rgrid, *cgrid, &coord) &&
+                !isSatisfiedAboutCircle(*rgrid, *cgrid)) {
+        return false;
+    }
     return true;
 }

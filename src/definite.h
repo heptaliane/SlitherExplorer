@@ -22,6 +22,8 @@ bool isSatisfiedAboutCell(
 
 bool isSatisfiedAboutEdge(const Matrix &rgrid, const Matrix &cgrid);
 
+bool isSatisfiedAboutCircle(const Matrix &rgrid, const Matrix &cgrid);
+
 bool applyDiagonalTheoryWith0(
         const Matrix &cell, Matrix* rgrid, Matrix* cgrid);
 

@@ -124,6 +124,7 @@ void executeSearchWithLog (
         oss.str("");
         oss << "/" << std::setw(5) << std::setfill('0') << cnt++ << ".png";
         img.write(logdirpath + oss.str(), cell, curr.rgrid, curr.cgrid, vertex);
+        std::cout << "save image to \"" << oss.str() << "\"" << std::endl;
         std::cout << "New grid added: stack = " << stored.size() <<
             std::endl;
         stored.push_back(curr);
@@ -134,4 +135,7 @@ void executeSearchWithLog (
             break;
         }
     }
+
+    rgrid->copy(stored.back().rgrid);
+    cgrid->copy(stored.back().cgrid);
 }

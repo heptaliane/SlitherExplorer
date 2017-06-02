@@ -65,20 +65,19 @@ void readCSV(const std::string filename, Matrix* container) {
 
 int main(int argc, char** argv) {
 
-    ImageBuilder img("graphics.dat");
     Matrix cell;
     readCSV(std::string(argv[1]), &cell);
     Matrix rgrid(cell.rows() + 1, cell.cols(), 2);
     Matrix cgrid(cell.rows(), cell.cols() + 1, 2);
     Matrix vertex(cell.rows() + 1, cell.cols() + 1);
 
-    img.write("test.png", cell, rgrid, cgrid, vertex);
-
     if (!applyDefinite(cell, &rgrid, &cgrid)) {
         std::cout << "Invalid data" << std::endl;
         return -1;
     }
 
+    ImageBuilder img("graphics.dat");
+    img.write("test.png", cell, rgrid, cgrid, vertex);
     executeSearch(cell, &rgrid, &cgrid);
     img.write(argv[2], cell, rgrid, cgrid, vertex);
 }
