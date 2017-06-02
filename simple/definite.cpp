@@ -157,15 +157,21 @@ bool applyDiagonalTheoryWith3Slave(
         const Coord &coord, const Matrix &cell, const Matrix &rgrid,
         const Matrix &cgrid, int idx) {
 
-    char dgrid[8];
+    char grid[8];
     Coord crd(coord.x + (1 & idx) - (1 & ~idx), coord.y + (2 & idx) - 1);
 
     if (cell.get(crd.y, crd.x) == 2) {
-        getDiagonalGrid(crd, rgrid, cgrid, dgrid);
+        getDiagonalGrid(crd, rgrid, cgrid, grid);
         int opp1 = (1 & idx) + (2 & ~idx), opp2 = (1 & ~idx) + (2 & idx);
 
-        return (dgrid[opp1 * 2] == 0 && dgrid[opp1 * 2 + 1] == 0) ||
-            (dgrid[opp2 * 2] == 0 && dgrid[opp2 * 2 + 1] == 0);
+        return (grid[opp1 * 2] == 0 && grid[opp1 * 2 + 1] == 0) ||
+            (grid[opp2 * 2] == 0 && grid[opp2 * 2 + 1] == 0);
+    } else if (cell.get(crd.y, crd.x) == 1) {
+        getCellGrid(crd, rgrid, cgrid, grid);
+        int opp1 = applyDiagonalTheoryWith1Slave[(3 & ~idx) * 2];
+        int opp2 = applyDiagonalTheoryWith1Slave[(3 & ~idx) * 2 + 1];
+
+        return grid[opp1] == 0 && grid[opp2] == 0;
     }
 
     return false;
@@ -604,6 +610,8 @@ bool applyDiagonalTheoryWith3(
         getDiagonalCell(coord, cell, dcell);
 
         for (i = 0; i < 4; i++) {
+            // diagonal cell is 3 or vertex has grid
+            // or diagonal cell is 2 and its grid will connect to 3 vertex
             if (dcell[i] == 3 || grid[i * 2] == 1 || grid[i * 2 + 1] == 1 ||
                     applyDiagonalTheoryWith3Slave(
                         coord, cell, *rgrid, *cgrid, i)) {

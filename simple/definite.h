@@ -34,6 +34,9 @@ bool applyDiagonalTheoryWith2(
 bool applyDiagonalTheoryWith3(
         const Matrix &cell, Matrix* rgrid, Matrix* cgrid);
 
+bool applyCrossTheoryWith1(
+        const Matrix &cell, Matrix* rgrid, Matrix* cgrid);
+
 bool applyCrossTheoryWith3(
         const Matrix &cell, Matrix* rgrid, Matrix* cgrid);
 

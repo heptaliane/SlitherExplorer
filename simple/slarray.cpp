@@ -65,6 +65,8 @@ void Matrix::copy(const Matrix &obj) {
         array[i] = *ptr;
         ++ptr;
     }
+
+    exception = obj.get(-1, -1);
 }
 
 bool Matrix::equals(const Matrix &obj) const {
