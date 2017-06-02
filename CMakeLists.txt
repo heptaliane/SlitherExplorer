@@ -12,11 +12,11 @@ project (SlitherExplorer CXX)
 find_package (OpenCV REQUIRED)
 
 add_executable (
-    SlitherExplorer main.cpp
-    slarray.cpp
-    definite.cpp
-    localFiles.cpp
-    search.cpp
+    SlitherExplorer ./src/main.cpp
+    ./src/slarray.cpp
+    ./src/definite.cpp
+    ./src/localFiles.cpp
+    ./src/search.cpp
 )
 
 target_link_libraries(SlitherExplorer ${OpenCV_LIBS})
