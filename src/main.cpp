@@ -78,5 +78,6 @@ int main(int argc, char** argv) {
 
     ImageBuilder img("graphics.dat");
     executeSearch(cell, &rgrid, &cgrid);
+    reloadVertex(rgrid, cgrid, &vertex);
     img.write(argv[2], cell, rgrid, cgrid, vertex);
 }

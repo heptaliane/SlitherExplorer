@@ -44,4 +44,6 @@ bool applyCrossTheoryWith3(
 
 bool applyDefinite(const Matrix &cell, Matrix* rgrid, Matrix* cgrid);
 
+void reloadVertex(const Matrix &rgrid, const Matrix &cgrid, Matrix* vertex);
+
 #endif /* DEFINITE_H_ */

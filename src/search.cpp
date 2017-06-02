@@ -74,6 +74,7 @@ void executeSearch (const Matrix &cell, Matrix* rgrid, Matrix* cgrid) {
             break;
         }
     }
+
     rgrid->copy(stored.back().rgrid);
     cgrid->copy(stored.back().cgrid);
 }

@@ -251,6 +251,9 @@ void seeGrid8(char* grid) {
     std::cout << std::endl;
 }
 
+static const int reloadVertexSlave[12] = {
+    0, 2, 1, 3, 0, 1, 1, 2, 2, 3, 3, 0,
+};
 }
 
 bool searchCell(const Matrix &cell, char num, Coord* coord) {
@@ -774,4 +777,27 @@ bool applyDefinite(const Matrix &cell, Matrix* rgrid, Matrix *cgrid) {
         return false;
     }
     return true;
+}
+
+void reloadVertex(const Matrix &rgrid, const Matrix &cgrid, Matrix* vertex) {
+
+    Coord coord;
+    int row = rgrid.rows();
+    int col = cgrid.cols();
+    int direction = -1;
+    char grid[4];
+
+    vertex->init(static_cast<char>(0));
+
+    for (coord.y = 0; coord.y < row; coord.y++) {
+        for (coord.x = 0; coord.x < col; coord.x++) {
+            getVertexGrid(coord, rgrid, cgrid, grid);
+            for (int i = 0; i < 6; ++i) {
+                if (grid[reloadVertexSlave[i * 2]] == 1 &&
+                        grid[reloadVertexSlave[i * 2 + 1]] == 1) {
+                    vertex->set(coord.y, coord.x, i + 1);
+                }
+            }
+        }
+    }
 }
