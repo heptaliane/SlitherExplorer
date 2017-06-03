@@ -341,15 +341,17 @@ bool connectEdgePair(
         const Matrix &cgrid, Coord* edge) {
 
     int direction = -1;
+    int cnt0, cnt1;
     char grid[4];
     edge->x = coord.x;
     edge->y = coord.y;
 
     while (true) {
         getVertexGrid(*edge, rgrid, cgrid, grid);
+        checkGridStatus(grid, &cnt0, &cnt1);
         direction = getDirection(direction, grid);
 
-        if (direction == -1) {
+        if (direction == -1 || cnt1 > 2) {
             return true;
         }
 
@@ -776,6 +778,7 @@ bool applyDefinite(const Matrix &cell, Matrix* rgrid, Matrix *cgrid) {
                 !isSatisfiedAboutCircle(*rgrid, *cgrid)) {
         return false;
     }
+
     return true;
 }
 
