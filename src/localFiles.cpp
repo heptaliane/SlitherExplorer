@@ -214,8 +214,8 @@ void ImageBuilder::drawCol(
 void ImageBuilder::drawVertex(
         int row, int col, int status, cv::Mat* image) const {
 
-    if (status < 0 || status > 2) {
-        status = 2;
+    if (status < 0 || status > 7) {
+        status = 0;
     }
 
     int rbegin = data[11].rows() * row + data[8].rows() * row;
